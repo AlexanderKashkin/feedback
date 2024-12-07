@@ -38,13 +38,13 @@ class PostgresSqlClient:
     def insert_feedback(self, feedback: Feedback):
         logger.info('start insert feedback')
         self._insert_row(
-            f"insert INTO feedback values (uuid_generate_v4(), now(), '{feedback.phone}', '{feedback.email}', '{feedback.msg}', '{feedback.name}')")
+            f"insert INTO feedback values (uuid_generate_v4(), now(), '{feedback.phone}', '{feedback.email}', '{feedback.msg}', '{feedback.name}', {feedback.status_publish_msg})")
         logger.info('end insert feedback')
 
     def insert_sign_form(self, sign_form: SignForm):
         logger.info('start insert sign_form')
         self._insert_row(
-            f"insert INTO sign_form values (uuid_generate_v4(), now(), '{sign_form.name}', '{sign_form.phone}')")
+            f"insert INTO sign_form values (uuid_generate_v4(), now(), '{sign_form.name}', '{sign_form.phone}', {sign_form.status_publish_msg})")
         logger.info('end insert sign_form')
 
 
