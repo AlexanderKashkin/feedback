@@ -1,3 +1,6 @@
+from datetime import datetime
+from uuid import uuid4
+
 import psycopg2 as pg2
 from fastapi import HTTPException, status
 
@@ -30,7 +33,7 @@ class PostgresSqlClient:
     def _insert_row(self, row):
         with self._connection().cursor() as connection:
             try:
-                connection.execute(row)
+                connection.execute(query=row['query'], vars=row['vars'])
             except Exception as e:
                 logger.error(e)
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
@@ -38,13 +41,32 @@ class PostgresSqlClient:
     def insert_feedback(self, feedback: Feedback):
         logger.info('start insert feedback')
         self._insert_row(
-            f"insert INTO feedback values (uuid_generate_v4(), now(), '{feedback.phone}', '{feedback.email}', '{feedback.msg}', '{feedback.name}', {feedback.status_publish_msg})")
+            {
+                'query': 'insert INTO feedback (id, timestamp, phone, email, message, name, status_publish_msg_in_redis) values (%(id)s, %(timestamp)s, %(phone)s, %(email)s, %(message)s, %(name)s, %(status_publish_msg_in_redis)s)',
+                'vars': {'id': str(uuid4()),
+                         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+                         'phone': feedback.phone,
+                         'email': feedback.email,
+                         'message': feedback.msg,
+                         'name': feedback.name,
+                         'status_publish_msg_in_redis': feedback.status_publish_msg
+                         }
+            }
+        )
         logger.info('end insert feedback')
 
     def insert_sign_form(self, sign_form: SignForm):
         logger.info('start insert sign_form')
         self._insert_row(
-            f"insert INTO sign_form values (uuid_generate_v4(), now(), '{sign_form.name}', '{sign_form.phone}', {sign_form.status_publish_msg})")
+            {
+                'query': 'insert INTO sign_form (id, timestamp, name, phone, status_publish_msg_redis) values (%(id)s, %(timestamp)s, %(name)s, %(phone)s, %(status_publish_msg_redis)s)',
+                'vars': {'id': str(uuid4()),
+                         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+                         'name': sign_form.name,
+                         'phone': sign_form.phone,
+                         'status_publish_msg_redis': sign_form.status_publish_msg}
+            }
+        )
         logger.info('end insert sign_form')
 
 
