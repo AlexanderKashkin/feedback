@@ -1,0 +1,13 @@
+database:
+  user: 'postgres'
+  password: 'secret'
+  host: 'localhost'
+  port: '5432'
+redis:
+  host: 'localhost'
+  port: '6379'
+  topic: 'test'
+  db: '0'
+  service: 'docfedorov'
+  env: 'prod'
+

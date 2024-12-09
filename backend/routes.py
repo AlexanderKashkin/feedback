@@ -7,6 +7,7 @@ from db.client import PostgresSqlClient
 from redis_client.client import RedisClient
 
 app = FastAPI()
+
 logger.add('log.txt')
 logger.info('start app')
 

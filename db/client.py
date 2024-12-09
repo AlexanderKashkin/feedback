@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 import psycopg2 as pg2
@@ -6,14 +6,15 @@ from fastapi import HTTPException, status
 
 from backend.models import Feedback, SignForm
 from backend.routes import logger
+from config.load_conf import config
 
 
 class PostgresSqlClient:
     def __init__(self):
-        self.user = 'postgres'
-        self.password = 'secret'
-        self.host = 'localhost'
-        self.port = '5432'
+        self.user = config.database.user
+        self.password = config.database.password
+        self.host = config.database.host
+        self.port = config.database.port
 
     logger.info('start db')
 
@@ -44,7 +45,7 @@ class PostgresSqlClient:
             {
                 'query': 'insert INTO feedback (id, timestamp, phone, email, message, name, status_publish_msg_in_redis) values (%(id)s, %(timestamp)s, %(phone)s, %(email)s, %(message)s, %(name)s, %(status_publish_msg_in_redis)s)',
                 'vars': {'id': str(uuid4()),
-                         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+                         'timestamp': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f'),
                          'phone': feedback.phone,
                          'email': feedback.email,
                          'message': feedback.msg,
@@ -61,7 +62,7 @@ class PostgresSqlClient:
             {
                 'query': 'insert INTO sign_form (id, timestamp, name, phone, status_publish_msg_redis) values (%(id)s, %(timestamp)s, %(name)s, %(phone)s, %(status_publish_msg_redis)s)',
                 'vars': {'id': str(uuid4()),
-                         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+                         'timestamp': datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f'),
                          'name': sign_form.name,
                          'phone': sign_form.phone,
                          'status_publish_msg_redis': sign_form.status_publish_msg}

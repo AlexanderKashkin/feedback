@@ -4,14 +4,16 @@ from redis import Redis
 from backend.routes import logger
 from redis_client.models import BaseMessage
 
+from config.load_conf import config
 
 class RedisClient:
-    host: str = 'localhost'
-    port: int = 6379
-    topic = 'test'
+    host: str = config.redis.host
+    port: int = int(config.redis.port)
+    topic: str = config.redis.topic
+    db: int = int(config.redis.db)
 
     logger.info('start redis client')
-    client = Redis(host=host, port=port, db=0)
+    client = Redis(host=host, port=port, db=db)
 
     def publish(self, obj):
         logger.info(f'start publish {str(obj)}')
