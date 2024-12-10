@@ -1,5 +1,7 @@
+debug: 'True'
 database:
   user: 'postgres'
+  name: 'postgres'
   password: 'secret'
   host: 'localhost'
   port: '5432'
@@ -10,4 +12,3 @@ redis:
   db: '0'
   service: 'docfedorov'
   env: 'prod'
-

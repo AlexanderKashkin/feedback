@@ -1,35 +1,46 @@
 from datetime import datetime, timezone
+from pathlib import Path
 from uuid import uuid4
 
 import psycopg2 as pg2
 from fastapi import HTTPException, status
+from yoyo import get_backend
+from yoyo import read_migrations
 
 from backend.models import Feedback, SignForm
 from backend.routes import logger
-from config.load_conf import config
 
 
 class PostgresSqlClient:
-    def __init__(self):
-        self.user = config.database.user
-        self.password = config.database.password
-        self.host = config.database.host
-        self.port = config.database.port
+    def __init__(self, config):
+        self.cfg = config
 
     logger.info('start db')
 
     def _connection(self):
         logger.info('connect to db')
         try:
-            connection_db = pg2.connect(user=self.user,
-                                        password=self.password,
-                                        host=self.host,
-                                        port=self.port)
+            connection_db = pg2.connect(user=self.cfg.user,
+                                        password=self.cfg.password,
+                                        host=self.cfg.host,
+                                        port=self.cfg.port)
             connection_db.autocommit = True  # autosave commit in db
             return connection_db
         except Exception as e:
             logger.error(e)
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='failed to connect to db')
+
+    def migrations(self):
+        backend = get_backend(f'postgresql://{self.cfg.user}:{self.cfg.password}@{self.cfg.host}/{self.cfg.name}')
+        migrations = read_migrations(str(Path(Path.cwd(), 'migrations')))
+
+        with backend.lock():
+            logger.info('start migrations')
+            # Apply any outstanding migrations
+            backend.apply_migrations(backend.to_apply(migrations))
+
+            # # Rollback all migrations
+            # backend.rollback_migrations(backend.to_rollback(migrations))
 
     def _insert_row(self, row):
         with self._connection().cursor() as connection:
@@ -69,11 +80,3 @@ class PostgresSqlClient:
             }
         )
         logger.info('end insert sign_form')
-
-
-def insert_feedback_to_db(feedback: Feedback):
-    return PostgresSqlClient().insert_feedback(feedback)
-
-
-def insert_sign_form_to_db(sign_form: SignForm):
-    return PostgresSqlClient().insert_sign_form(sign_form)

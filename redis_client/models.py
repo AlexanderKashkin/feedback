@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, tzinfo
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from backend.models import Feedback, SignForm
@@ -6,16 +6,15 @@ from backend.models import Feedback, SignForm
 
 class SignEvent:
     def __init__(self, sign_form):
+        self.sign_form = sign_form
         self.event = 'sign'
-        self.name = sign_form.name
-        self.phone = sign_form.phone
 
     def get_data(self):
         return {
             'event': self.event,
             'person': {
-                'name': self.name,
-                'phone': self.phone
+                'name': self.sign_form.name,
+                'phone': self.sign_form.phone
             }
         }
 
@@ -23,19 +22,16 @@ class SignEvent:
 class ReviewEvent:
     def __init__(self, review_form):
         self.event = 'review'
-        self.name = review_form.name
-        self.phone = review_form.phone
-        self.email = review_form.email
-        self.message = review_form.msg
+        self.review_form = review_form
 
     def get_data(self):
         return {
             'event': self.event,
             'message': {
-                'name': self.name,
-                'phone': self.phone,
-                'email': self.email,
-                'message': self.message
+                'name': self.review_form.name,
+                'phone': self.review_form.phone,
+                'email': self.review_form.email,
+                'message': self.review_form.message
             }
         }
 

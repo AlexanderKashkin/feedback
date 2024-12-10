@@ -6,13 +6,16 @@ from backend.models import Feedback, SignForm
 from db.client import PostgresSqlClient
 from redis_client.client import RedisClient
 
+from config.load_conf import config
+
 app = FastAPI()
 
 logger.add('log.txt')
 logger.info('start app')
 
-redis = RedisClient()
-db = PostgresSqlClient()
+redis = RedisClient(config.redis)
+db = PostgresSqlClient(config.database)
+db.migrations()
 
 
 @app.post("/feedback", status_code=status.HTTP_201_CREATED)
