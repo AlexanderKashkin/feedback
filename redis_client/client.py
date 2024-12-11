@@ -1,8 +1,9 @@
 from fastapi import HTTPException, status
 from redis import Redis
 
+from backend.models import Feedback, SignForm
 from backend.routes import logger
-from redis_client.models import BaseMessage
+from redis_client.models import SignEvent, ReviewEvent
 
 
 class RedisClient:
@@ -12,12 +13,19 @@ class RedisClient:
 
     logger.info('start redis client')
 
-    def publish(self, obj):
-        logger.info(f'start publish {str(obj)}')
-        msg = BaseMessage(obj=obj).create_msg()
+    def _publish(self, msg):
+        logger.info(f'start publish {str(msg)}')
         try:
             self.client.publish(channel=self.cfg.topic, message=str(msg))
-            obj.status_publish_msg = True
+            return True
         except Exception as e:
             logger.error(f'publish msg is failed, ex {e}')
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+            return False
+
+    def notify_feedback(self, feedback: Feedback):
+        result = self._publish(ReviewEvent(feedback).msg)
+        feedback.status_publish_msg = result
+
+    def notify_review(self, sign_form: SignForm):
+        result = self._publish(SignEvent(sign_form).msg)
+        sign_form.status_publish_msg = result

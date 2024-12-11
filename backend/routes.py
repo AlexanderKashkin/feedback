@@ -22,7 +22,7 @@ db.migrations()
 async def feedback(request_feedback: Feedback):
     logger.info(f'get request {feedback.__name__}, body: {request_feedback}')
     verify_captcha(request_feedback.token)
-    redis.publish(request_feedback)
+    redis.notify_feedback(request_feedback)
     db.insert_feedback(request_feedback)
     logger.info('end')
     return {}
@@ -32,7 +32,7 @@ async def feedback(request_feedback: Feedback):
 async def sign_form(request_sign_form: SignForm):
     logger.info(f'get request {sign_form.__name__}, body: {request_sign_form}')
     verify_captcha(request_sign_form.token)
-    redis.publish(request_sign_form)
+    redis.notify_review(request_sign_form)
     db.insert_sign_form(request_sign_form)
     logger.info('end')
     return {}
