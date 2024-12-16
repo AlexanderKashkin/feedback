@@ -1,4 +1,6 @@
-debug: 'True'
+debug: False
+captcha:
+  secret: '6Lex-JkqAAAAAIQA0SW4WZUQ9wjU1cYsRpNLwLu'
 database:
   user: 'postgres'
   name: 'postgres'
